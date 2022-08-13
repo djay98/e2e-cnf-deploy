@@ -1,0 +1,18 @@
+---
+  - name: "Ansible hello world"
+    hosts: localhost
+    connection: local
+    tasks:
+    - name: "Call an API"
+      uri:
+        url: https://jsonplaceholder.typicode.com/users
+        method: GET
+        body_format: json
+        return_content: yes
+        headers:
+          Content-Type: application/json
+      
+      register:
+        output
+    
+    - debug: var=output
