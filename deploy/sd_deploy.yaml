@@ -35,7 +35,7 @@
         sd_hirerachy_result
     - debug: var=sd_hirerachy_result
 
-      - name: "Invoke SD API for NF deployment"
+    - name: "Invoke SD API for NF deployment"
       uri:
         url: http://sd.vsop.mtce.vzwnet.com:8080/v2/services
         method: POST

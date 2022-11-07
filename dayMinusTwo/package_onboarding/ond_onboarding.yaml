@@ -3,10 +3,6 @@
     hosts: localhost
     gather_facts: no
 
-
-    vars_files:
-      - "{{playbook_dir}}/../../vault.yaml"
-
     tasks:
     - name: "Set common configuration vairables"
       include_tasks:
