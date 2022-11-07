@@ -1,0 +1,20 @@
+- name: Get MP Access Token
+  uri:
+    url: "{{ vnfmp_url }}/basic/v1/user/signin"
+    method: POST
+    body:
+      username: "{{ mp_username }}"
+      password: "{{ mp_password}}"
+    body_format: json
+    force_basic_auth: yes
+    headers:
+      Authorization: "Basic Y3NvY2xpZW50OmNzb3NlY3JldA=="
+      Content-Type: "application/json"
+      Accept: application/json
+    validate_certs: no
+  register: vnfmp_login_result
+  no_log: true
+
+- name: "Set MP Access token"
+  set_fact:
+    mp_access_token: "{{ vnfmp_login_result.json.access_token  }}"

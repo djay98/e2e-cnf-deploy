@@ -1,0 +1,20 @@
+- name: Set env_type variable
+  set_fact:
+    env_type = "{{ envType | default('ME', true) }}"
+  delegate_to: localhost
+
+- name: Set vnfmp configurations
+  set_fact:
+    vnfmp_url: https://vsp.vzwnet.com
+
+- name: Define SSO URL for ME
+  set_fact:
+    fr_sso_sd_redirect_url: https://vsop-ond-ple1.vzwnet.com/ssoprovider/extension/oidc/authorize-callback
+    fr_sso_sd_client_id: 27003_ID7V_OND_GZ_OAUTH2CLIENT
+    fr_sso_sd_client_secret: 27003ID7V
+    fr_sso_response_type: code
+    fr_sso_scope: 'openid profile1'
+    fr_sso_decision: allow
+    fr_sso_am_url: https://ssologin.verizon.com/ngauth/json/realms/root/realms/employee/authenticate?authIndexType=service&authIndexValue=IWAAuth
+    fr_sso_authz_url: https://ssologin.verizon.com/ngauth/oauth2/authorize?realm=employee
+    fr_sso_access_token_url: https://ssologin.verizon.com/ngauth/oauth2/realms/root/realms/employee/access_token

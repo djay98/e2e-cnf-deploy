@@ -1,0 +1,51 @@
+---
+  - name: Deploy NF using the SD RSO-1 API
+    hosts: localhost
+    gather_facts: no
+
+    vars:
+      skip_scp: false
+
+    vars_files:
+      - main.yaml
+
+    tasks:
+    - name: "Set common configuration vairables"
+      include_tasks:
+        file: "{{playbook_dir}}/../common/set_common_variables.yaml"
+
+    - name: "Generate access token for SD"
+      include_tasks:
+        file: "{{playbook_dir}}/../common/generate_sd_oauth2_token.yaml"
+
+    - debug: var="{{ lookup('file','sd_hierarchy_body.json') }}"
+
+    - name: "Invoke SD API for NF deployment"
+      uri:
+        url: http://sd.vsop.mtce.vzwnet.com:8080/v2/services?limit=100000
+        method: POST
+        body_format: json
+        return_content: yes
+        validate_certs: no
+        headers:
+          Content-Type: 'application/json'
+          Authorization: "Bearer {{fr_sd_access_token}}"
+        body: "{{ lookup('file','sd_hierarchy_body.json') }}"
+      register:
+        sd_hirerachy_result
+    - debug: var=sd_hirerachy_result
+
+      - name: "Invoke SD API for NF deployment"
+      uri:
+        url: http://sd.vsop.mtce.vzwnet.com:8080/v2/services
+        method: POST
+        body_format: json
+        return_content: yes
+        validate_certs: no
+        headers:
+          Content-Type: 'application/json'
+          Authorization: "Bearer {{fr_sd_access_token}}"
+        body: "{{ lookup('file','sd_hierarchy_body.json') }}"
+      register:
+        sd_hirerachy_result
+    - debug: var=sd_hirerachy_result

@@ -1,0 +1,64 @@
+- name: "1. Get AM token"
+  uri:
+    url: "{{fr_sso_am_url}}"
+    method: POST
+    body_format: json
+    return_content: yes
+    headers:
+      X-OpenAM-Username: jayapdh
+      X-OpenAM-Password: Anya@456 
+      Content-Type: 'application/json'
+      Accept-API-Version: 'resource=2.1, protocol=1.0'
+    force_basic_auth: true
+    url_username: jayapdh
+    url_password: Anya@3456
+  register:
+    am_token_result
+- debug: var=am_token_result.json
+
+- name: "2. Get authorization code"
+  uri:
+    url: "{{fr_sso_authz_url}}"
+    method: POST
+    body_format: form-urlencoded
+    return_content: no
+    headers:
+      Content-Type: 'application/x-www-form-urlencoded'
+      Cookie: "SSOPRDSESSION={{am_token_result.json.tokenId}}"
+    body:
+      redirect_uri: "{{fr_sso_sd_redirect_url}}"
+      client_id: "{{fr_sso_sd_client_id}}"
+      response_type: "{{fr_sso_response_type}}"
+      scope: "{{fr_sso_scope}}"
+      csrf: "{{am_token_result.json.tokenId}}"
+      decision: "{{fr_sso_decision}}"
+    follow_redirects: false
+    status_code:
+      - 302
+  register:
+    authorize_result
+- set_fact:
+    authorization_code: "{{ authorize_result.location|string|regex_findall('(?<=code=)(.+?)(?=&)') }}"
+- debug: var=authorize_result
+
+- name: "3. Get access token"
+  uri:
+    url: "{{fr_sso_access_token_url}}"
+    method: POST
+    body_format: form-urlencoded
+    return_content: yes
+    headers:
+      Content-Type: 'application/x-www-form-urlencoded'
+    body:
+      grant_type: "authorization_code"
+      code: "{{authorization_code[0]}}"
+      redirect_uri: "{{fr_sso_sd_redirect_url}}"
+      client_id: "{{fr_sso_sd_client_id}}"
+      client_secret: "{{fr_sso_sd_client_secret}}"
+  register:
+    access_token_result
+- debug: var=access_token_result.json.access_token
+
+- name: "Set Access token"
+  set_fact:
+    fr_sd_access_token: "{{ access_token_result.json.access_token  }}"

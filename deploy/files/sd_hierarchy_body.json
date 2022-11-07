@@ -1,0 +1,22 @@
+{
+    "services": {
+        "searchcriteria": {
+            "type": "BooleanExprGroup",
+            "operator": "OR",
+            "expressions": [
+                {
+                    "type": "BooleanExprComparison",
+                    "operator": "EQ",
+                    "parameter": "entity",
+                    "value": "Account"
+                }
+            ]
+        },
+        "responsecriteria": {
+            "parameters": [
+                "accountname",
+                "allowedEntities"
+            ]
+        }
+    }
+}

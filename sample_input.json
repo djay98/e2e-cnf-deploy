@@ -1,0 +1,60 @@
+{
+    "companyName": "Amdocs",
+    "productName": "VSOP_GOSIMPLECNF",
+    "releaseName": "1.0.0",
+    "packageName": "gosimplecnf-VZ-V0.zip",
+
+    "sdAccount": "NFVO_VZW_PLANNER_VSOP_SI_VDCTEST",
+    "nfvdOrganization": "5GC",
+    "nfvdVDC": "vdc_rchltxekvzwctest-y-am-x-000",
+    "nfvdVnfg": "vnfg_test",
+    "nfvdDatacenter": "kub2-2",
+    "namespace": "rchltxekvzwctest-y-am-x-000",
+
+    "dayMinusTwo": {
+        "packageOnboarding": {
+            "skip": true
+        }
+    },
+
+    "deployArtifacts": [
+        {
+            "type": "Parameter",
+            "name": "rchltxekvzwctest-y-am-x-000-gosimplecnf-1.0.1-input.json"
+        },
+        {
+            "type": "Value",
+            "name": "rchltxekvzwctest-y-am-x-000-gosimplecnf-1.0.1-values.yaml",
+            "container": "hello",
+            "component": "values.yaml.100"
+        }
+    ],
+
+    "preDeploy": [
+        {
+            "name": "VSOP-PRE-DEPLOY-WORKFLOW",
+            "sequenceId": "1",
+            "onError": "continue",
+            "delay": 0,
+            "type": "workflow",
+            "extraVars": {
+                "key1": "value1",
+                "key2": "value2"
+            }
+        }
+    ],
+
+    "postDeploy": [
+        {
+            "name": "VSOP-PRE-DEPLOY-WORKFLOW",
+            "sequenceId": "1",
+            "onError": "continue",
+            "delay": 0,
+            "type": "workflow",
+            "extraVars": {
+                "key1": "value1",
+                "key2": "value2"
+            }
+        }
+    ]
+}

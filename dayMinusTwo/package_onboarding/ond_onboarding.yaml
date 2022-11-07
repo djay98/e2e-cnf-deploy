@@ -1,0 +1,73 @@
+---
+  - name: Onboard a package from Marketplace to OND
+    hosts: localhost
+    gather_facts: no
+
+
+    vars_files:
+      - "{{playbook_dir}}/../../vault.yaml"
+
+    tasks:
+    - name: "Set common configuration vairables"
+      include_tasks:
+        file: "{{playbook_dir}}/../../common/set_common_variables.yaml"
+
+    - name: "Generate access token for Marketplace"
+      include_tasks:
+        file: "{{playbook_dir}}/../../common/generate_vnfmp_access_token.yaml"
+
+    - name: Get VNF Product Information
+      uri:
+        url: "{{ vnfmp_url }}/api/v1/vnfs/fetch?vnfProduct={{ mp_product }}&companyName={{ mp_company }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vnfmp_login_result.json.access_token }}"
+          Content-Type: "application/json,text/plain"
+        validate_certs: no
+      register: vnf_info_result
+      when: vnfmp_login_result.status == 200
+
+    - name: print VnfId
+      debug:
+        msg: "{{ vnf_info_result }}"
+
+
+    - name: Get All Packages Information 
+      uri:
+        url: "{{ vnfmp_url }}/api/v1/vnfs/{{vnf_info_result.json.vnfId}}/packages/all?page=0&sizePerPage=1000"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ vnfmp_login_result.json.access_token }}"
+          Content-Type: "application/json,text/plain"
+        validate_certs: no
+      register: vnf_pkgs_result
+
+    - name: print package info
+      debug:
+        msg: "{{ vnf_pkgs_result }}"
+
+    - name: Get Package ID For {{mp_package_name}} inside {{mp_release_name}}
+      set_fact:
+        vnf_mp_pkg_id: "{{ vnf_pkgs_result.pkg.id }}"
+      loop: "{{ packageInfo.json.packages }}"
+      when: 'vnf_pkgs_result.pkg.artifactName == mp_package_name and vnf_pkgs_result.pkg.vendorReleaseVersion == mp_release_name'
+
+    - name: Package Existence Test
+      debug: 
+        msg: "Able to find package - {{mp_package_name}} inside  {{mp_release_name}}"
+      failed_when: vnf_mp_pkg_id is not defined 
+
+    - name: Download CSAR Package
+      get_url: 
+        url: "{{ vnfmp_url }}/api/v1/vnfs/packages/{{ vnf_mp_pkg_id }}/downloadFileFromArtifactory?fileType=packages&fromPortal=true" 
+        headers:
+            Accept-Encoding: gzip, deflate, br
+            Authorization: Bearer {{ vnfmp_login_result.json.access_token }}
+        dest: '{{ destPath }}/{{ packageId }}.zip'
+        validate_certs: no
+
+    - name: Set CSAR package path
+      set_stats:
+        data:
+          csarPackage: "{{ destPath }}/{{ packageId }}"
+      delegate_to: localhost
